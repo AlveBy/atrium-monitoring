@@ -1,0 +1,72 @@
+{
+    "name": "alveby/atrium-monitoring",
+    "description": "Load monitoring for Atrium: server timings, real user Web Vitals and uptime checks with alerts, all on your own server",
+    "type": "atrium-module",
+    "license": "MIT",
+    "homepage": "https://github.com/AlveBy/atrium",
+    "support": {
+        "issues": "https://github.com/AlveBy/atrium/issues",
+        "source": "https://github.com/AlveBy/atrium"
+    },
+    "keywords": [
+        "laravel",
+        "admin",
+        "cms",
+        "monitoring",
+        "web-vitals",
+        "uptime",
+        "performance",
+        "multisite"
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^13.0",
+        "alveby/atrium": "^0.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.5"
+    },
+    "suggest": {
+        "alveby/atrium-theme": "Puts the Web Vitals script into the public pages by itself",
+        "alveby/atrium-mail": "Sends the incident letters through the mail module's accounts and history"
+    },
+    "autoload": {
+        "psr-4": {
+            "Atrium\\Monitoring\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Atrium\\Monitoring\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "atrium": {
+            "key": "monitoring",
+            "title": "atrium-monitoring::monitoring.title",
+            "settings": "Atrium\\Monitoring\\MonitoringSettings",
+            "permissions": {
+                "view": {
+                    "label": "atrium-monitoring::monitoring.permissions.view",
+                    "with": "uptime_checks.view"
+                }
+            },
+            "resources": [
+                "Atrium\\Monitoring\\Models\\UptimeCheck",
+                "Atrium\\Monitoring\\Models\\Incident"
+            ],
+            "migrations": "database/migrations"
+        },
+        "laravel": {
+            "providers": [
+                "Atrium\\Monitoring\\MonitoringServiceProvider"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
