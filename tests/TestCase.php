@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Atrium\Monitoring\Tests;
 
 use Atrium\Admin\AtriumServiceProvider;
+use Atrium\Admin\Hooks\Hooks;
 use Atrium\Admin\Models\AdminUser;
 use Atrium\Monitoring\MonitoringServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Inertia\ServiceProvider as InertiaServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
+use ReflectionProperty;
 use Tighten\Ziggy\ZiggyServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -24,6 +26,9 @@ abstract class TestCase extends Orchestra
     use RefreshDatabase;
 
     protected string $bufferPath;
+
+    /** A test of the module with the core's own cache counters, as they are on a real site. */
+    protected bool $coreCacheCounters = false;
 
     protected function getPackageProviders($app): array
     {
@@ -64,6 +69,26 @@ abstract class TestCase extends Orchestra
 
         $this->withoutVite();
         Http::preventStrayRequests();
+        if (! $this->coreCacheCounters) {
+            $this->withoutCacheCounters();
+        }
+    }
+
+    /**
+     * The core registers an `atrium.cache.stats` filter of its own cache; the
+     * module's own counting of Laravel's cache events (the case of a site
+     * with no such filter) is the default of these tests. A test of the two
+     * working together sets $coreCacheCounters.
+     */
+    protected function withoutCacheCounters(): void
+    {
+        $hooks = app(Hooks::class);
+        $filters = new ReflectionProperty($hooks, 'filters');
+
+        $all = $filters->getValue($hooks);
+        unset($all['atrium.cache.stats']);
+        $filters->setValue($hooks, $all);
+
     }
 
     protected function tearDown(): void
