@@ -131,7 +131,10 @@ final class BufferWriteTest extends TestCase
     {
         app(Flusher::class)->write([['k' => 'v', 'lcp' => '2100.5', 'inp' => 'abc', 'cls' => 0.0, 'ttfb' => null, 'fcp' => '']]);
 
-        $this->assertSame(['lcp' => 2100.5, 'inp' => null, 'cls' => 0.0, 'ttfb' => null, 'fcp' => null], Arr::only($this->row('monitoring_vitals'), ['lcp', 'inp', 'cls', 'ttfb', 'fcp']));
+        // PostgreSQL on PHP 8.3 hands decimals back as strings: the value is what counts, a missing one stays null.
+        $row = array_map(fn (mixed $value): ?float => $value === null ? null : (float) $value, Arr::only($this->row('monitoring_vitals'), ['lcp', 'inp', 'cls', 'ttfb', 'fcp']));
+
+        $this->assertSame(['lcp' => 2100.5, 'inp' => null, 'cls' => 0.0, 'ttfb' => null, 'fcp' => null], $row);
     }
 
     public function test_a_query_needs_a_real_hash(): void

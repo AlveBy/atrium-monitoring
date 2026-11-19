@@ -241,8 +241,10 @@ final class RumTest extends TestCase
             global.PerformanceObserver = window.PerformanceObserver;
             global.document = { currentScript: { dataset: { endpoint: '/atrium/rum', rate: b.rate } }, visibilityState: 'visible',
                 addEventListener: (t, f) => { on[t] = f } };
-            global.navigator = { sendBeacon: (u, body) => { sent = body; return true }, doNotTrack: b.dnt, connection: { effectiveType: b.connection } };
-            global.performance = { getEntriesByType: () => b.nav ? [{ responseStart: 380.44, activationStart: 0 }] : [] };
+            // Node 21+ has a read-only `navigator` of its own: a plain assignment is silently dropped.
+            const fake = (name, value) => Object.defineProperty(global, name, { value, configurable: true, writable: true });
+            fake('navigator', { sendBeacon: (u, body) => { sent = body; return true }, doNotTrack: b.dnt, connection: { effectiveType: b.connection } });
+            fake('performance', { getEntriesByType: () => b.nav ? [{ responseStart: 380.44, activationStart: 0 }] : [] });
             global.location = { pathname: '/news/hello' };
             eval(process.argv[2]);
             const feed = (t, list) => obs[t] && obs[t]({ getEntries: () => list });
