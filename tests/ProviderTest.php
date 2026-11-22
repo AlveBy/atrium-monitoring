@@ -62,10 +62,16 @@ final class ProviderTest extends TestCase
         $app['config']->set('atrium-monitoring.schedule', false);
     }
 
-    /** @return array<int,string> */
+    /**
+     * The monitoring tasks of the schedule; the admin's own are not its business.
+     *
+     * @return array<int,string>
+     */
     private function scheduled(): array
     {
-        return array_map(static fn ($event): string => preg_replace('/^.*artisan.? /', '', (string) $event->command).' '.$event->expression.' lock '.($event->withoutOverlapping ? $event->expiresAt : 'none'), app(Schedule::class)->events());
+        $events = array_filter(app(Schedule::class)->events(), static fn ($event): bool => str_contains((string) $event->command, 'atrium:monitoring'));
+
+        return array_values(array_map(static fn ($event): string => preg_replace('/^.*artisan.? /', '', (string) $event->command).' '.$event->expression.' lock '.($event->withoutOverlapping ? $event->expiresAt : 'none'), $events));
     }
 
     public function test_an_installed_module_measures_shows_and_schedules(): void

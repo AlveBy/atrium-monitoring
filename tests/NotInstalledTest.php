@@ -32,7 +32,11 @@ final class NotInstalledTest extends TestCase
         $this->assertFalse(Route::has('admin.monitoring.index'));
         $this->assertNotContains(MonitoringGadget::class, (array) config('atrium.dashboard.gadgets'));
         $this->assertArrayNotHasKey('atrium:monitoring:flush', Artisan::all());
-        $this->assertSame([], app(Schedule::class)->events());
+        // The admin schedules its own tasks (the imports in progress); monitoring none.
+        $this->assertSame([], array_values(array_filter(
+            app(Schedule::class)->events(),
+            static fn ($event): bool => str_contains((string) $event->command, 'atrium:monitoring'),
+        )));
         // The translations and the config are there for the install screen.
         $this->assertSame('Monitoring', __('atrium-monitoring::monitoring.title'));
         $this->assertSame(1.0, config('atrium-monitoring.server.sample_rate'));
