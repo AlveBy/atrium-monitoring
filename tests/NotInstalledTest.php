@@ -23,6 +23,8 @@ final class NotInstalledTest extends TestCase
         parent::defineEnvironment($app);
 
         $app['config']->set('atrium.modules', []);
+        // Even with the AI module there, its helper gets nothing of this module.
+        $app['config']->set('atrium-ai.help', ['enabled' => true, 'tools' => []]);
     }
 
     public function test_nothing_is_measured_shown_or_scheduled(): void
@@ -37,6 +39,7 @@ final class NotInstalledTest extends TestCase
             app(Schedule::class)->events(),
             static fn ($event): bool => str_contains((string) $event->command, 'atrium:monitoring'),
         )));
+        $this->assertSame([], config('atrium-ai.help.tools'));
         // The translations and the config are there for the install screen.
         $this->assertSame('Monitoring', __('atrium-monitoring::monitoring.title'));
         $this->assertSame(1.0, config('atrium-monitoring.server.sample_rate'));

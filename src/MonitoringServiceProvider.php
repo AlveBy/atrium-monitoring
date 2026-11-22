@@ -19,6 +19,7 @@ use Atrium\Monitoring\Buffer\Buffer;
 use Atrium\Monitoring\Buffer\Flusher;
 use Atrium\Monitoring\Collector\CollectMetrics;
 use Atrium\Monitoring\Collector\Recorder;
+use Atrium\Monitoring\Help\SiteSpeed;
 use Atrium\Monitoring\Rum\RumScript;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
@@ -74,6 +75,7 @@ final class MonitoringServiceProvider extends ServiceProvider
         $this->registerCollector();
         $this->registerRoutes();
         $this->registerAdmin();
+        $this->registerHelper();
         $this->registerTheme();
         $this->registerConsole();
     }
@@ -111,6 +113,18 @@ final class MonitoringServiceProvider extends ServiceProvider
 
             return Menu::add($items);
         });
+    }
+
+    /**
+     * The AI module's helper answers questions about the speed of the site
+     * with it, when that module is there (it has its config) and the admin
+     * may open the page.
+     */
+    private function registerHelper(): void
+    {
+        if (config()->has('atrium-ai.help')) {
+            config()->push('atrium-ai.help.tools', SiteSpeed::class);
+        }
     }
 
     private function registerTheme(): void

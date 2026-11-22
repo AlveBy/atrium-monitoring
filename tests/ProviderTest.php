@@ -130,4 +130,9 @@ final class ProviderTest extends TestCase
         $this->assertSame([], $this->scheduled());
         $this->assertArrayHasKey('atrium:monitoring:flush', Artisan::all());
     }
+
+    public function test_without_the_ai_module_its_helper_is_not_touched(): void
+    {
+        $this->assertNull(config('atrium-ai'));
+    }
 }
