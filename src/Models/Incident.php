@@ -88,6 +88,12 @@ class Incident extends Model implements Administrable
         return __('atrium-monitoring::monitoring.modules.incidents');
     }
 
+    /** Service records, not content: no custom fields, no link target. */
+    public static function isContentModule(): bool
+    {
+        return false;
+    }
+
     public static function getAdminRoutePrefix(): string
     {
         return 'monitoring_incidents';

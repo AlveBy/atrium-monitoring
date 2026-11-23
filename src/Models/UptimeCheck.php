@@ -97,6 +97,12 @@ class UptimeCheck extends Model implements Administrable
         return __('atrium-monitoring::monitoring.create.check');
     }
 
+    /** Service records, not content: no custom fields, no link target. */
+    public static function isContentModule(): bool
+    {
+        return false;
+    }
+
     public static function getAdminRoutePrefix(): string
     {
         return 'uptime_checks';
