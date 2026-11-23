@@ -135,4 +135,12 @@ final class ProviderTest extends TestCase
     {
         $this->assertNull(config('atrium-ai'));
     }
+
+    public function test_the_gadget_is_on_the_dashboard_once_after_config_cache(): void
+    {
+        // A cached config already holds the gadget: booting on top of it must not add it again.
+        $this->app->getProvider(MonitoringServiceProvider::class)->boot();
+
+        $this->assertSame(1, array_count_values((array) config('atrium.dashboard.gadgets'))[MonitoringGadget::class]);
+    }
 }

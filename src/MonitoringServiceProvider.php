@@ -12,6 +12,7 @@ namespace Atrium\Monitoring;
 use Atrium\Admin\Facades\Hook;
 use Atrium\Admin\Models\AdminUser;
 use Atrium\Admin\Modules\Modules;
+use Atrium\Admin\Support\ConfigList;
 use Atrium\Monitoring\Admin\Menu;
 use Atrium\Monitoring\Admin\MonitoringController;
 use Atrium\Monitoring\Admin\MonitoringGadget;
@@ -104,7 +105,7 @@ final class MonitoringServiceProvider extends ServiceProvider
 
     private function registerAdmin(): void
     {
-        config()->push('atrium.dashboard.gadgets', MonitoringGadget::class);
+        ConfigList::add('atrium.dashboard.gadgets', MonitoringGadget::class);
 
         Hook::filter('atrium.admin.menu', function (array $items, ?AdminUser $user = null): array {
             if ($user !== null && ! $user->hasAdminPermission(MonitoringController::PERMISSION)) {
@@ -123,7 +124,7 @@ final class MonitoringServiceProvider extends ServiceProvider
     private function registerHelper(): void
     {
         if (config()->has('atrium-ai.help')) {
-            config()->push('atrium-ai.help.tools', SiteSpeed::class);
+            ConfigList::add('atrium-ai.help.tools', SiteSpeed::class);
         }
     }
 

@@ -12,6 +12,7 @@ namespace Atrium\Monitoring\Tests;
 use Atrium\Admin\Models\AdminRole;
 use Atrium\Admin\Models\AdminUser;
 use Atrium\Monitoring\Help\SiteSpeed;
+use Atrium\Monitoring\MonitoringServiceProvider;
 use Atrium\Monitoring\Stats\Aggregator;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Carbon;
@@ -73,6 +74,14 @@ final class SiteSpeedToolTest extends TestCase
 
     public function test_the_tool_is_one_of_the_helpers_when_the_ai_module_is_there(): void
     {
+        $this->assertSame([SiteSpeed::class], config('atrium-ai.help.tools'));
+    }
+
+    public function test_the_tool_is_one_of_the_helpers_once_after_config_cache(): void
+    {
+        // A cached config already holds the tool: booting on top of it must not add it again.
+        $this->app->getProvider(MonitoringServiceProvider::class)->boot();
+
         $this->assertSame([SiteSpeed::class], config('atrium-ai.help.tools'));
     }
 
