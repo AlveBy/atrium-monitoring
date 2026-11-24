@@ -105,7 +105,7 @@ final class MonitoringServiceProvider extends ServiceProvider
 
     private function registerAdmin(): void
     {
-        ConfigList::add('atrium.dashboard.gadgets', MonitoringGadget::class);
+        Hook::register('atrium.ui.gadgets', 'monitoring', MonitoringGadget::class);
 
         Hook::filter('atrium.admin.menu', function (array $items, ?AdminUser $user = null): array {
             if ($user !== null && ! $user->hasAdminPermission(MonitoringController::PERMISSION)) {

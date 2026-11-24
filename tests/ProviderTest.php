@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Atrium\Monitoring\Tests;
 
+use Atrium\Admin\Facades\Hook;
 use Atrium\Monitoring\Admin\MonitoringGadget;
 use Atrium\Monitoring\Collector\CollectMetrics;
 use Atrium\Monitoring\MonitoringServiceProvider;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Inertia\Testing\AssertableInertia as Assert;
 use Orchestra\Testbench\Attributes\DefineEnvironment;
 
 final class ProviderTest extends TestCase
@@ -79,7 +81,7 @@ final class ProviderTest extends TestCase
         $this->assertContains(CollectMetrics::class, app('router')->getMiddlewareGroups()['web']);
         $this->assertTrue(Route::has('atrium-monitoring.rum'));
         $this->assertTrue(Route::has('admin.monitoring.index'));
-        $this->assertContains(MonitoringGadget::class, config('atrium.dashboard.gadgets'));
+        $this->assertSame(MonitoringGadget::class, Hook::resolve('atrium.ui.gadgets', 'monitoring'));
         $this->assertArrayHasKey('atrium:monitoring:prune', Artisan::all());
         $this->assertArrayHasKey('atrium:monitoring:benchmark', Artisan::all());
         $this->assertSame([
@@ -136,11 +138,11 @@ final class ProviderTest extends TestCase
         $this->assertNull(config('atrium-ai'));
     }
 
-    public function test_the_gadget_is_on_the_dashboard_once_after_config_cache(): void
+    public function test_the_gadget_is_on_the_dashboard_once_after_booting_again(): void
     {
-        // A cached config already holds the gadget: booting on top of it must not add it again.
         $this->app->getProvider(MonitoringServiceProvider::class)->boot();
 
-        $this->assertSame(1, array_count_values((array) config('atrium.dashboard.gadgets'))[MonitoringGadget::class]);
+        $this->actingAs($this->admin(), 'admin')->get('/admin')->assertInertia(fn (Assert $page) => $page
+            ->where('gadgets', fn ($gadgets): bool => collect($gadgets)->where('component', 'MonitoringGadget')->pluck('key')->all() === ['gadget-monitoring']));
     }
 }

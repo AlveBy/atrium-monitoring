@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Atrium\Monitoring\Tests;
 
-use Atrium\Monitoring\Admin\MonitoringGadget;
+use Atrium\Admin\Facades\Hook;
 use Atrium\Monitoring\Collector\CollectMetrics;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Artisan;
@@ -32,7 +32,7 @@ final class NotInstalledTest extends TestCase
         $this->assertNotContains(CollectMetrics::class, app('router')->getMiddlewareGroups()['web'] ?? []);
         $this->assertFalse(Route::has('atrium-monitoring.rum'));
         $this->assertFalse(Route::has('admin.monitoring.index'));
-        $this->assertNotContains(MonitoringGadget::class, (array) config('atrium.dashboard.gadgets'));
+        $this->assertNull(Hook::resolve('atrium.ui.gadgets', 'monitoring'));
         $this->assertArrayNotHasKey('atrium:monitoring:flush', Artisan::all());
         // The admin schedules its own tasks (the imports in progress); monitoring none.
         $this->assertSame([], array_values(array_filter(
