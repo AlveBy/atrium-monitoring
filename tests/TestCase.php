@@ -102,7 +102,7 @@ abstract class TestCase extends Orchestra
     {
         $admin = AdminUser::query()->create([
             'name' => 'Admin',
-            'email' => 'admin'.random_int(1, 1_000_000).'@example.com',
+            'email' => 'admin'.bin2hex(random_bytes(8)).'@example.com',
             'password' => 'secret-password',
             'is_active' => true,
         ]);
